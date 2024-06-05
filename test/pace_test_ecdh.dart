@@ -28,12 +28,12 @@ void main(){
     // Test vectors taken from Appendix D.3 to Part 11 of ICAO 9303 p11 doc.
     // ref: https://www.icao.int/publications/Documents/9303_p11_cons_en.pdf
 
-    final dbaKeys    = DBAKey( "T22000129", DateTime(1964,8,12), DateTime(2010,10,31), paceMode: true);
+    final dbaKeys    = DBAKey( "098007724", DateTime(1998,8,18), DateTime(2038,8,18), paceMode: true);
 
     final tvKeySeed  = "7e2d2a41c74ea0b38cd36f863939bfa8e9032aad".parseHex(); //changed
     final tvKenc     = "3dc4f8862f8a1570b57fefdcfec43e46".parseHex(); //changed
     final tvKmac     = "bc641c6b2fa8b5704552322007761f85".parseHex(); //changed
-    final tv_K_pi    = "89ded1b26624ec1e634c1989302849dd".parseHex(); //changed
+    final tvKPi    = "89ded1b26624ec1e634c1989302849dd".parseHex(); //changed
 
     final nonceEncypted  = "95a3a016522ee98d01e76cb6b98b42c3".parseHex();
     final nonceDecrypted = "3F00C4D39D153F2B2A214A078D899B22".parseHex();
@@ -137,7 +137,7 @@ void main(){
 
     // K_pi
     var kpi = dbaKeys.Kpi(CipherAlgorithm.AES, KEY_LENGTH.s128);
-    expect(kpi, tv_K_pi);
+    expect(kpi, tvKPi);
 
     // terminal's public key
     ECDHPace terminal = DomainParameterSelectorECDH.getDomainParameter(id: paceDomainParameterID);
@@ -205,7 +205,7 @@ void main(){
     // nonce management
     AESCipher aesCipherNonce = AESChiperSelector.getChiper(size: KEY_LENGTH.s128);
     Uint8List decryptedNonceCalc = aesCipherNonce.decrypt(data: nonceEncypted, key: kpi);
-    print ("Decrypted nonce:" + decryptedNonceCalc.hex());
+    print ("Decrypted nonce:${decryptedNonceCalc.hex()}");
     expect (decryptedNonceCalc.length, 16);
     expect(decryptedNonceCalc, nonceDecrypted);
 

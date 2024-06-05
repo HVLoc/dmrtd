@@ -314,7 +314,7 @@ class PACE {
           Uint8List.sublistView(Uint8List.fromList(crytpographicMechanism.identifier), 1));
 
       _log.sdVerbose("Object identifier: ${objectIdentifierData.toBytes().hex()}");
-      TLV? publicKeyData = null;
+      TLV? publicKeyData;
 
       _log.sdVerbose("Ephemeral public point: ${ephemeralPublic.toString()}");
 

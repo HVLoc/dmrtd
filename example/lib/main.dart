@@ -1,23 +1,18 @@
 // Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
 // ignore_for_file: prefer_adjacent_string_concatenation, prefer_interpolation_to_compose_strings
 
-import 'package:dmrtd/internal.dart';
-import 'package:expandable/expandable.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:dmrtd/dmrtd.dart';
 import 'package:dmrtd/extensions.dart';
+import 'package:dmrtd/src/proto/can_key.dart';
+import 'package:expandable/expandable.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:dmrtd/src/proto/can_key.dart';
-
-import 'package:dmrtd/src/proto/ecdh_pace.dart';
 
 class MrtdData {
   EfCardAccess? cardAccess;
@@ -66,9 +61,9 @@ final Map<DgTag, String> dgTagToString = {
 
 Widget _makeMrtdAccessDataWidget(
     {required String header,
-      required String collapsedText,
-      required bool isPACE,
-      required bool isDBA}) {
+    required String collapsedText,
+    required bool isPACE,
+    required bool isDBA}) {
   return ExpandablePanel(
       theme: const ExpandableThemeData(
         headerAlignment: ExpandablePanelHeaderAlignment.center,
@@ -82,19 +77,18 @@ Widget _makeMrtdAccessDataWidget(
       expanded: Container(
           padding: const EdgeInsets.all(18),
           color: Color.fromARGB(255, 239, 239, 239),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Access protocol: ${isPACE ? "PACE" : "BAC"}',
-                  //style: TextStyle(fontSize: 16.0),
-                ),
-                SizedBox(height: 8.0),
-                Text(
-                  'Access key type: ${isDBA ? "DBA" : "CAN"}',
-                  //style: TextStyle(fontSize: 16.0),
-                )
-              ])));
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(
+              'Access protocol: ${isPACE ? "PACE" : "BAC"}',
+              //style: TextStyle(fontSize: 16.0),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              'Access key type: ${isDBA ? "DBA" : "CAN"}',
+              //style: TextStyle(fontSize: 16.0),
+            )
+          ])));
 }
 
 String formatEfCom(final EfCOM efCom) {
@@ -174,15 +168,14 @@ void main() {
 class MrtdEgApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return PlatformApp(
-        localizationsDelegates: [
-          DefaultMaterialLocalizations.delegate,
-          DefaultCupertinoLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        material: (_, __) => MaterialAppData(),
-        cupertino: (_, __) => CupertinoAppData(),
-        home: MrtdHomePage());
+    return GetMaterialApp(
+      localizationsDelegates: [
+        DefaultMaterialLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      home: MrtdHomePage(),
+    );
   }
 }
 
@@ -202,10 +195,10 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   final _canData = GlobalKey<FormState>();
 
   // mrz data
-  final _docNumber = TextEditingController();
-  final _dob = TextEditingController(); // date of birth
-  final _doe = TextEditingController();
-  final _can = TextEditingController();
+  final _docNumber = TextEditingController(text: '098007724');
+  final _dob = TextEditingController(text: '08/18/1998'); // date of birth
+  final _doe = TextEditingController(text: '08/18/2038');
+  final _can = TextEditingController(text: '007724');
   bool _checkBoxPACE = false;
 
   MrtdData? _mrtdData;
@@ -232,9 +225,9 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     _initPlatformState();
 
     // Update platform state every 3 sec
-    _timerStateUpdater = Timer.periodic(Duration(seconds: 3), (Timer t) {
-      _initPlatformState();
-    });
+    // _timerStateUpdater = Timer.periodic(Duration(seconds: 3), (Timer t) {
+    //   _initPlatformState();
+    // });
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -288,49 +281,48 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   }
 
   void _buttonPressed() async {
-      print("Button pressed");
-      //Check on what tab we are
-      if (_tabController.index == 0) {
-          //DBA tab
-          String errorText = "";
-          if (_doe.text.isEmpty) {
-            errorText += "Please enter date of expiry!\n";
-          }
-          if (_dob.text.isEmpty) {
-            errorText += "Please enter date of birth!\n";
-          }
-          if (_docNumber.text.isEmpty) {
-            errorText += "Please enter passport number!";
-          }
-
-          setState(() {
-            _alertMessage = errorText;
-          });
-          //If there is an error, just jump out of the function
-          if (errorText.isNotEmpty) return;
-
-          final bacKeySeed = DBAKey(_docNumber.text, _getDOBDate()!, _getDOEDate()!, paceMode: _checkBoxPACE);
-          _readMRTD(accessKey: bacKeySeed, isPace: _checkBoxPACE);
-      } else {
-        //PACE tab
-        String errorText = "";
-        if (_can.text.isEmpty) {
-            errorText = "Please enter CAN number!";
-        }
-        else if (_can.text.length != 6) {
-          errorText = "CAN number must be exactly 6 digits long!";
-        }
-
-        setState(() {
-          _alertMessage = errorText;
-        });
-        //If there is an error, just jump out of the function
-        if (errorText.isNotEmpty) return;
-
-        final canKeySeed = CanKey(_can.text);
-        _readMRTD(accessKey: canKeySeed, isPace: true);
+    print("Button pressed");
+    //Check on what tab we are
+    if (_tabController.index == 0) {
+      //DBA tab
+      String errorText = "";
+      if (_doe.text.isEmpty) {
+        errorText += "Please enter date of expiry!\n";
+      }
+      if (_dob.text.isEmpty) {
+        errorText += "Please enter date of birth!\n";
+      }
+      if (_docNumber.text.isEmpty) {
+        errorText += "Please enter passport number!";
       }
 
+      setState(() {
+        _alertMessage = errorText;
+      });
+      //If there is an error, just jump out of the function
+      if (errorText.isNotEmpty) return;
+
+      final bacKeySeed = DBAKey(_docNumber.text, _getDOBDate()!, _getDOEDate()!,
+          paceMode: _checkBoxPACE);
+      _readMRTD(accessKey: bacKeySeed, isPace: _checkBoxPACE);
+    } else {
+      //PACE tab
+      String errorText = "";
+      if (_can.text.isEmpty) {
+        errorText = "Please enter CAN number!";
+      } else if (_can.text.length != 6) {
+        errorText = "CAN number must be exactly 6 digits long!";
+      }
+
+      setState(() {
+        _alertMessage = errorText;
+      });
+      //If there is an error, just jump out of the function
+      if (errorText.isNotEmpty) return;
+
+      final canKeySeed = CanKey(_can.text);
+      _readMRTD(accessKey: canKeySeed, isPace: true);
+    }
   }
 
   void _readMRTD({required AccessKey accessKey, bool isPace = false}) async {
@@ -342,9 +334,10 @@ class _MrtdHomePageState extends State<MrtdHomePage>
       });
       try {
         bool demo = false;
-        if (!demo)
+        if (!demo) {
           await _nfc.connect(
               iosAlertMessage: "Hold your phone near Biometric Passport");
+        }
 
         final passport = Passport(_nfc);
 
@@ -357,8 +350,11 @@ class _MrtdHomePageState extends State<MrtdHomePage>
 
         try {
           mrtdData.cardAccess = await passport.readEfCardAccess();
-        } on PassportError {
+        } on PassportError catch (e) {
+          print("erorrrrr 2 " + e.message);
           //if (e.code != StatusWord.fileNotFound) rethrow;
+        } catch (e) {
+          print("erorrrrr" + e.toString());
         }
 
         _nfc.setIosAlertMessage("Trying to read EF.CardSecurity ...");
@@ -372,7 +368,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _nfc.setIosAlertMessage("Initiating session with PACE...");
         //set MrtdData
         mrtdData.isPACE = isPace;
-        mrtdData.isDBA = accessKey.PACE_REF_KEY_TAG == 0x01 ? true : false;
+        mrtdData.isDBA = accessKey.PACE_REF_KEY_TAG == 0x01;
 
         if (isPace) {
           //PACE session
@@ -445,11 +441,11 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           mrtdData.dg14 = await passport.readEfDG14();
         }
 
-        if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
-          mrtdData.dg15 = await passport.readEfDG15();
-          _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
-          mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
+        //   mrtdData.dg15 = await passport.readEfDG15();
+        //   _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
+        //   mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
+        // }
 
         if (mrtdData.com!.dgTags.contains(EfDG16.TAG)) {
           mrtdData.dg16 = await passport.readEfDG16();
@@ -509,171 +505,9 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     }
   }
 
-  void _readMRTDOld() async {
-    try {
-      setState(() {
-        _mrtdData = null;
-        _alertMessage = "Waiting for Passport tag ...";
-        _isReading = true;
-      });
-
-      await _nfc.connect(
-          iosAlertMessage: "Hold your phone near Biometric Passport");
-      final passport = Passport(_nfc);
-
-      setState(() {
-        _alertMessage = "Reading Passport ...";
-      });
-
-      _nfc.setIosAlertMessage("Trying to read EF.CardAccess ...");
-      final mrtdData = MrtdData();
-
-      try {
-        mrtdData.cardAccess = await passport.readEfCardAccess();
-      } on PassportError {
-        //if (e.code != StatusWord.fileNotFound) rethrow;
-      }
-
-      _nfc.setIosAlertMessage("Trying to read EF.CardSecurity ...");
-
-      try {
-        mrtdData.cardSecurity = await passport.readEfCardSecurity();
-      } on PassportError {
-        //if (e.code != StatusWord.fileNotFound) rethrow;
-      }
-
-      _nfc.setIosAlertMessage("Initiating session ...");
-      final bacKeySeed =
-          DBAKey(_docNumber.text, _getDOBDate()!, _getDOEDate()!);
-      await passport.startSession(bacKeySeed);
-
-      _nfc.setIosAlertMessage(formatProgressMsg("Reading EF.COM ...", 0));
-      mrtdData.com = await passport.readEfCOM();
-
-      _nfc.setIosAlertMessage(formatProgressMsg("Reading Data Groups ...", 20));
-
-      if (mrtdData.com!.dgTags.contains(EfDG1.TAG)) {
-        mrtdData.dg1 = await passport.readEfDG1();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG2.TAG)) {
-        mrtdData.dg2 = await passport.readEfDG2();
-      }
-
-      // To read DG3 and DG4 session has to be established with CVCA certificate (not supported).
-      // if(mrtdData.com!.dgTags.contains(EfDG3.TAG)) {
-      //   mrtdData.dg3 = await passport.readEfDG3();
-      // }
-
-      // if(mrtdData.com!.dgTags.contains(EfDG4.TAG)) {
-      //   mrtdData.dg4 = await passport.readEfDG4();
-      // }
-
-      if (mrtdData.com!.dgTags.contains(EfDG5.TAG)) {
-        mrtdData.dg5 = await passport.readEfDG5();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG6.TAG)) {
-        mrtdData.dg6 = await passport.readEfDG6();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG7.TAG)) {
-        mrtdData.dg7 = await passport.readEfDG7();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG8.TAG)) {
-        mrtdData.dg8 = await passport.readEfDG8();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG9.TAG)) {
-        mrtdData.dg9 = await passport.readEfDG9();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG10.TAG)) {
-        mrtdData.dg10 = await passport.readEfDG10();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG11.TAG)) {
-        mrtdData.dg11 = await passport.readEfDG11();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG12.TAG)) {
-        mrtdData.dg12 = await passport.readEfDG12();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
-        mrtdData.dg13 = await passport.readEfDG13();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
-        mrtdData.dg14 = await passport.readEfDG14();
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
-        mrtdData.dg15 = await passport.readEfDG15();
-        _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
-        mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
-      }
-
-      if (mrtdData.com!.dgTags.contains(EfDG16.TAG)) {
-        mrtdData.dg16 = await passport.readEfDG16();
-      }
-
-      _nfc.setIosAlertMessage(formatProgressMsg("Reading EF.SOD ...", 80));
-      mrtdData.sod = await passport.readEfSOD();
-
-      setState(() {
-        _mrtdData = mrtdData;
-      });
-
-      setState(() {
-        _alertMessage = "";
-      });
-
-      _scrollController.animateTo(300.0,
-          duration: Duration(milliseconds: 500), curve: Curves.ease);
-    } on Exception catch (e) {
-      final se = e.toString().toLowerCase();
-      String alertMsg = "An error has occurred while reading Passport!";
-      if (e is PassportError) {
-        if (se.contains("security status not satisfied")) {
-          alertMsg =
-              "Failed to initiate session with passport.\nCheck input data!";
-        }
-        _log.error("PassportError: ${e.message}");
-      } else {
-        _log.error(
-            "An exception was encountered while trying to read Passport: $e");
-      }
-
-      if (se.contains('timeout')) {
-        alertMsg = "Timeout while waiting for Passport tag";
-      } else if (se.contains("tag was lost")) {
-        alertMsg = "Tag was lost. Please try again!";
-      } else if (se.contains("invalidated by user")) {
-        alertMsg = "";
-      }
-
-      setState(() {
-        _alertMessage = alertMsg;
-      });
-    } finally {
-      if (_alertMessage.isNotEmpty) {
-        await _nfc.disconnect(iosErrorMessage: _alertMessage);
-      } else {
-        await _nfc.disconnect(
-            iosAlertMessage: formatProgressMsg("Finished", 100));
-      }
-      setState(() {
-        _isReading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return PlatformProvider(
-        builder: (BuildContext context) => _buildPage(context));
+    return _buildPage(context);
   }
 
   bool _disabledInput() {
@@ -701,11 +535,10 @@ class _MrtdHomePageState extends State<MrtdHomePage>
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  PlatformTextButton(
+                  TextButton(
                     child: Text('Copy'),
                     onPressed: () =>
                         Clipboard.setData(ClipboardData(text: dataText)),
-                    padding: const EdgeInsets.all(8),
                   ),
                   SelectableText(dataText, textAlign: TextAlign.left)
                 ])));
@@ -715,12 +548,13 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     List<Widget> list = [];
     if (_mrtdData == null) return list;
 
-    if (_mrtdData!.isPACE != null && _mrtdData!.isDBA != null)
+    if (_mrtdData!.isPACE != null && _mrtdData!.isDBA != null) {
       list.add(_makeMrtdAccessDataWidget(
           header: "Access protocol",
           collapsedText: '',
           isDBA: _mrtdData!.isDBA!,
           isPACE: _mrtdData!.isPACE!));
+    }
 
     if (_mrtdData!.cardAccess != null) {
       list.add(_makeMrtdDataWidget(
@@ -872,67 +706,78 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     return list;
   }
 
-  PlatformScaffold _buildPage(BuildContext context) => PlatformScaffold(
-      appBar: PlatformAppBar(title: Text('MRTD Example App')),
-      iosContentPadding: false,
-      iosContentBottomPadding: false,
-      body: Material(
+  Scaffold _buildPage(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: Text('MRTD Example App'),
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  _initPlatformState();
+                },
+                child: Icon(
+                  Icons.refresh,
+                ))
+          ],
+        ),
+        // iosContentPadding: false,
+        // iosContentBottomPadding: false,
+        body: Material(
           child: SafeArea(
-              child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: SingleChildScrollView(
-                      controller: _scrollController,
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            _buildForm(context),
-                            SizedBox(height: 20),
-                            PlatformElevatedButton(
-                              // btn Read MRTD
-                              onPressed: _buttonPressed,
-                              child: PlatformText(
-                                  _isReading ? 'Reading ...' : 'Read Passport'),
-                            ),
-                            SizedBox(height: 20),
-                            Row(children: <Widget>[
-                              Text('NFC available:',
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      _buildForm(context),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        // btn Read MRTD
+                        onPressed: _buttonPressed,
+                        child:
+                            Text(_isReading ? 'Reading ...' : 'Read Passport'),
+                      ),
+                      SizedBox(height: 20),
+                      Row(children: <Widget>[
+                        Text('NFC available:',
+                            style: TextStyle(
+                                fontSize: 18.0, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 4),
+                        Text(_isNfcAvailable ? "Yes" : "No",
+                            style: TextStyle(fontSize: 18.0))
+                      ]),
+                      SizedBox(height: 15),
+                      Text(_alertMessage,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 15.0, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 15),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(_mrtdData != null ? "Passport Data:" : "",
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 18.0,
+                                      fontSize: 15.0,
                                       fontWeight: FontWeight.bold)),
-                              SizedBox(width: 4),
-                              Text(_isNfcAvailable ? "Yes" : "No",
-                                  style: TextStyle(fontSize: 18.0))
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 16.0, top: 8.0, bottom: 8.0),
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: _mrtdDataWidgets()))
                             ]),
-                            SizedBox(height: 15),
-                            Text(_alertMessage,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.bold)),
-                            SizedBox(height: 15),
-                            Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                        _mrtdData != null
-                                            ? "Passport Data:"
-                                            : "",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: 15.0,
-                                            fontWeight: FontWeight.bold)),
-                                    Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 16.0, top: 8.0, bottom: 8.0),
-                                        child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: _mrtdDataWidgets()))
-                                  ]),
-                            ),
-                          ]))))));
+                      ),
+                    ]),
+              ),
+            ),
+          ),
+        ),
+      );
 
   Widget _buildForm(BuildContext context) {
     return Column(children: <Widget>[
@@ -946,17 +791,14 @@ class _MrtdHomePageState extends State<MrtdHomePage>
       ),
       Container(
           height: 350,
-          child: TabBarView(controller: _tabController,
-
-              children: <Widget>[
+          child: TabBarView(controller: _tabController, children: <Widget>[
             Card(
-          borderOnForeground: false,
+              borderOnForeground: false,
               elevation: 0,
               color: Colors.white,
               //shadowColor: Colors.white,
               margin: const EdgeInsets.all(16.0),
               child: Form(
-
                 key: _mrzData,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1056,47 +898,46 @@ class _MrtdHomePageState extends State<MrtdHomePage>
                         });
                       },
                     )
-
                   ],
-                 ),
+                ),
               ),
             ),
-                Card(
-                  borderOnForeground: false,
-                  elevation: 0,
-                  color: Colors.white,
-                  //shadowColor: Colors.white,
-                  margin: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _canData,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        TextFormField(
-                          enabled: !_disabledInput(),
-                          controller: _can,
-                          decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'CAN number',
-                              fillColor: Colors.white),
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.allow(RegExp(r'[0-9]+')),
-                            LengthLimitingTextInputFormatter(6)
-                          ],
-                          textInputAction: TextInputAction.done,
-                          textCapitalization: TextCapitalization.characters,
-                          autofocus: true,
-                          validator: (value) {
-                            if (value?.isEmpty ?? false) {
-                              return 'Please enter CAN number';
-                            }
-                            return null;
-                          },
-                        ),
+            Card(
+              borderOnForeground: false,
+              elevation: 0,
+              color: Colors.white,
+              //shadowColor: Colors.white,
+              margin: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _canData,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    TextFormField(
+                      enabled: !_disabledInput(),
+                      controller: _can,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'CAN number',
+                          fillColor: Colors.white),
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]+')),
+                        LengthLimitingTextInputFormatter(6)
                       ],
+                      textInputAction: TextInputAction.done,
+                      textCapitalization: TextCapitalization.characters,
+                      // autofocus: true,
+                      validator: (value) {
+                        if (value?.isEmpty ?? false) {
+                          return 'Please enter CAN number';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                )
+                  ],
+                ),
+              ),
+            )
           ]))
     ]);
   }
