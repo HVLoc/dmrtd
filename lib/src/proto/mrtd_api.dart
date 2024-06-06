@@ -102,43 +102,82 @@ class MrtdApi {
   /// Can throw [ComProviderError] in case connection with MRTD is lost.
   Future<void> selectMasterFile() async {
     _log.debug("Selecting root Master File");
-    try {
-      // Attempt to select the Master File (MF) with P1-P2 = 0x0000 and empty data field
-      await icc.selectFile(cla: ISO7816_CLA.NO_SM, p1: 0x00, p2: 0x00);
-    } on ICCError catch (error) {
-      _log.warning(
-          "Couldn't select MF with P1: 0x00, P2: 0x00, sw=${error.sw}, retrying with data='3F00'");
-      try {
-        // Attempt to select the Master File (MF) with P1-P2 = 0x0000 and data field = '0x3F00'
-        await icc.selectFile(
-            cla: ISO7816_CLA.NO_SM,
-            p1: 0x00,
-            p2: 0x00,
-            data: Uint8List.fromList([0x3F, 0x00]));
-      } on ICCError catch (error) {
-        _log.warning(
-            "Couldn't select MF with P1: 0x00, P2: 0x00, data='3F00', sw=${error.sw}, retrying with P2=0x0C and data='3F00'");
+
+    // List of possible P1 values
+    // List<int> p1Values = [
+    //   0x04,
+    // ];
+    List<int> p1Values = [0x00, 0x01, 0x02, 0x04, 0x08];
+    // List of possible P2 values
+    // List<int> p2Values = [
+    //   0x00,
+    // ];
+    List<int> p2Values = [0x00, 0x02, 0x04, 0x08, 0x0C];
+    for (int i = 0; i < p1Values.length; i++) {
+      for (int j = 0; j < p2Values.length; j++) {
+        int p1 = p1Values[i];
+        int p2 = p2Values[j];
         try {
-          // Attempt to select the Master File (MF) with P2=0x0C and data field = '0x3F00'
+          print(
+              'Trying P1: ${p1.toRadixString(16).padLeft(2, '0').toUpperCase()}, P2: ${p2.toRadixString(16).padLeft(2, '0').toUpperCase()}');
           await icc.selectFile(
-              cla: ISO7816_CLA.NO_SM,
-              p1: 0x00,
-              p2: 0x0C,
-              data: Uint8List.fromList([0x3F, 0x00]));
-        } on ICCError catch (error) {
+            cla: ISO7816_CLA.NO_SM, p1: p1, // P1
+            p2: p2, // P2
+          );
+          // await icc.transceive(Uint8List.fromList([
+          //   0x00, // CLA
+          //   0xA4, // INS
+          //   p1, // P1
+          //   p2, // P2
+          //   0x00 // Le
+          // ]));
+
           _log.warning(
-              "Couldn't select MF with P2=0x0C, data='3F00', sw=${error.sw}, retrying with P2=0x0C and empty data");
-          try {
-            // Attempt to select the Master File (MF) with P2=0x0C and empty data field
-            await icc.selectFile(cla: ISO7816_CLA.NO_SM, p1: 0x00, p2: 0x0C);
-          } on ICCError catch (finalError) {
-            _log.warning(
-                "Couldn't select MF with P1: 0x00, P2: 0x0C, sw=${finalError.sw}");
-            rethrow; // Rethrow the final error after all attempts
-          }
+              'Success with P1: ${p1.toRadixString(16).padLeft(2, '0').toUpperCase()}, P2: ${p2.toRadixString(16).padLeft(2, '0').toUpperCase()}');
+          break;
+        } catch (e) {
+          print(
+              'Error with P1: ${p1.toRadixString(16).padLeft(2, '0').toUpperCase()}, P2: ${p2.toRadixString(16).padLeft(2, '0').toUpperCase()} - Error: $e');
         }
       }
     }
+    // try {
+    //   // Attempt to select the Master File (MF) with P1-P2 = 0x0000 and empty data field
+    //   await icc.selectFile(cla: ISO7816_CLA.NO_SM, p1: 0x04, p2: 0x00);
+    // } on ICCError catch (error) {
+    //   _log.warning(
+    //       "Couldn't select MF with P1: 0x00, P2: 0x00, sw=${error.sw}, retrying with data='3F00'");
+    //   try {
+    //     // Attempt to select the Master File (MF) with P1-P2 = 0x0000 and data field = '0x3F00'
+    //     await icc.selectFile(
+    //         cla: ISO7816_CLA.NO_SM,
+    //         p1: 0x00,
+    //         p2: 0x00,
+    //         data: Uint8List.fromList([0x3F, 0x00]));
+    //   } on ICCError catch (error) {
+    //     _log.warning(
+    //         "Couldn't select MF with P1: 0x00, P2: 0x00, data='3F00', sw=${error.sw}, retrying with P2=0x0C and data='3F00'");
+    //     try {
+    //       // Attempt to select the Master File (MF) with P2=0x0C and data field = '0x3F00'
+    //       await icc.selectFile(
+    //           cla: ISO7816_CLA.NO_SM,
+    //           p1: 0x00,
+    //           p2: 0x0C,
+    //           data: Uint8List.fromList([0x3F, 0x00]));
+    //     } on ICCError catch (error) {
+    //       _log.warning(
+    //           "Couldn't select MF with P2=0x0C, data='3F00', sw=${error.sw}, retrying with P2=0x0C and empty data");
+    //       try {
+    //         // Attempt to select the Master File (MF) with P2=0x0C and empty data field
+    //         await icc.selectFile(cla: ISO7816_CLA.NO_SM, p1: 0x00, p2: 0x0C);
+    //       } on ICCError catch (finalError) {
+    //         _log.warning(
+    //             "Couldn't select MF with P1: 0x00, P2: 0x0C, sw=${finalError.sw}");
+    //         rethrow; // Rethrow the final error after all attempts
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   /// Returns raw EF file bytes of selected DF identified by [fid] from MRTD.

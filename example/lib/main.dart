@@ -198,7 +198,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   final _docNumber = TextEditingController(text: '098007724');
   final _dob = TextEditingController(text: '08/18/1998'); // date of birth
   final _doe = TextEditingController(text: '08/18/2038');
-  final _can = TextEditingController(text: '007724');
+  final _can = TextEditingController(text: '006031');
   bool _checkBoxPACE = false;
 
   MrtdData? _mrtdData;
@@ -354,7 +354,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           print("erorrrrr 2 " + e.message);
           //if (e.code != StatusWord.fileNotFound) rethrow;
         } catch (e) {
-          print("erorrrrr" + e.toString());
+          print("erorrrrr " + e.toString());
         }
 
         _nfc.setIosAlertMessage("Trying to read EF.CardSecurity ...");
