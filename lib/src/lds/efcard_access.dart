@@ -33,7 +33,7 @@ class EfCardAccess extends ElementaryFile {
 
   @override
   void parse(Uint8List content) {
-    _log.sdVerbose("Parsing EF.CardAccess" + content.hex());
+    _log.sdVerbose("Parsing EF.CardAccess${content.hex()}");
 
     var parser = ASN1Parser(content);
     if (!parser.hasNext()) {
@@ -47,7 +47,7 @@ class EfCardAccess extends ElementaryFile {
     // - PaceInfo
     // - PACEDomainParameterInfo
 
-    if (set.elements == null || set.elements!.length < 1) {
+    if (set.elements == null || set.elements!.isEmpty) {
       _log.error("Invalid structure of EF.CardAccess. More than one element in set.");
       throw EfParseError("Invalid structure of EF.CardAccess. More than one element in set.");
     }
@@ -57,7 +57,7 @@ class EfCardAccess extends ElementaryFile {
       throw EfParseError("Invalid structure of EF.CardAccess. First element in set is not ASN1Sequence.");
     }
 
-    PaceInfo pi = PaceInfo(content: set.elements![0] as ASN1Sequence);
+    PaceInfo pi = PaceInfo(content: set.elements![2] as ASN1Sequence);
     _log.info("PaceInfo parsed.");
 
     _log.sdDebug("PaceInfo: $pi");
