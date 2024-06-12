@@ -104,15 +104,15 @@ class MrtdApi {
     _log.debug("Selecting root Master File");
 
     // List of possible P1 values
-    // List<int> p1Values = [
-    //   0x04,
-    // ];
-    List<int> p1Values = [0x00, 0x01, 0x02, 0x04, 0x08];
+    List<int> p1Values = [
+      0x04,
+    ];
+    // List<int> p1Values = [0x00, 0x01, 0x02, 0x04, 0x08];
     // List<int> p1Values = [0x00, 0x01, 0x02, 0x08];
     // List of possible P2 values
 
-    List<int> p2Values = [0x00, 0x02, 0x04, 0x08, 0x0C];
-    // List<int> p2Values = [0x02, 0x04, 0x08, 0x0C];
+    // List<int> p2Values = [0x00, 0x02, 0x04, 0x08, 0x0C];
+    List<int> p2Values = [0x00];
     for (int i = 0; i < p1Values.length; i++) {
       for (int j = 0; j < p2Values.length; j++) {
         int p1 = p1Values[i];

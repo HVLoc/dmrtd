@@ -2,6 +2,7 @@
 // ignore_for_file: prefer_adjacent_string_concatenation, prefer_interpolation_to_compose_strings
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dmrtd/dmrtd.dart';
 import 'package:dmrtd/extensions.dart';
@@ -198,7 +199,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   final _docNumber = TextEditingController(text: '098007724');
   final _dob = TextEditingController(text: '08/18/1998'); // date of birth
   final _doe = TextEditingController(text: '08/18/2038');
-  final _can = TextEditingController(text: '006031');
+  final _can = TextEditingController(text: '007724');
   bool _checkBoxPACE = false;
 
   MrtdData? _mrtdData;
@@ -209,6 +210,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   late Timer _timerStateUpdater;
   final _scrollController = ScrollController();
   late final TabController _tabController;
+
+  String rawData13 = '';
 
   @override
   void initState() {
@@ -365,14 +368,20 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           //if (e.code != StatusWord.fileNotFound) rethrow;
         }
 
-        _nfc.setIosAlertMessage("Initiating session with PACE...");
         //set MrtdData
         mrtdData.isPACE = isPace;
         mrtdData.isDBA = accessKey.PACE_REF_KEY_TAG == 0x01;
 
         if (isPace) {
+          _nfc.setIosAlertMessage("Initiating session with PACE...");
+          // Fix cứng giá trị vì ios không ddọc được efCardAccessData
+          final efCardAccessData =
+              "3134300d060804007f0007020202020101300f060a04007f000702020302020201013012060a04007f0007020204020202010202010d"
+                  .parseHex();
+
+          EfCardAccess efCardAccess = EfCardAccess.fromBytes(efCardAccessData);
           //PACE session
-          await passport.startSessionPACE(accessKey, mrtdData.cardAccess!);
+          await passport.startSessionPACE(accessKey, efCardAccess);
         } else {
           //BAC session
           await passport.startSession(accessKey as DBAKey);
@@ -435,6 +444,9 @@ class _MrtdHomePageState extends State<MrtdHomePage>
 
         if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
           mrtdData.dg13 = await passport.readEfDG13();
+          String decodedString =
+              utf8.decode(mrtdData.dg13!.toBytes(), allowMalformed: true);
+          rawData13 = removeSpecialCharacters(decodedString);
         }
 
         if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
@@ -673,6 +685,12 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           header: 'EF.DG13',
           collapsedText: '',
           dataText: _mrtdData!.dg13!.toBytes().hex()));
+    }
+    if (rawData13.isNotEmpty) {
+      list.add(_makeMrtdDataWidget(
+          header: 'rawData13',
+          collapsedText: '',
+          dataText: rawData13));
     }
 
     if (_mrtdData!.dg14 != null) {
@@ -940,5 +958,12 @@ class _MrtdHomePageState extends State<MrtdHomePage>
             )
           ]))
     ]);
+  }
+
+  String removeSpecialCharacters(String input) {
+    return input.replaceAll(
+        RegExp(
+            r'[^\w\s\r\f\t,:/-áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴđĐ]'),
+        '');
   }
 }
