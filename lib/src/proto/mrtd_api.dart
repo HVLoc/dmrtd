@@ -111,8 +111,8 @@ class MrtdApi {
     // List<int> p1Values = [0x00, 0x01, 0x02, 0x08];
     // List of possible P2 values
 
-    // List<int> p2Values = [0x00, 0x02, 0x04, 0x08, 0x0C];
-    List<int> p2Values = [0x00];
+    List<int> p2Values = [0x00, 0x02, 0x04, 0x08, 0x0C];
+    // List<int> p2Values = [0x00];
     for (int i = 0; i < p1Values.length; i++) {
       for (int j = 0; j < p2Values.length; j++) {
         int p1 = p1Values[i];
@@ -124,13 +124,6 @@ class MrtdApi {
             cla: ISO7816_CLA.NO_SM, p1: p1, // P1
             p2: p2, // P2
           );
-          // await icc.transceive(Uint8List.fromList([
-          //   0x00, // CLA
-          //   0xA4, // INS
-          //   p1, // P1
-          //   p2, // P2
-          //   0x00 // Le
-          // ]));
 
           _log.warning(
               'Success with P1: ${p1.toRadixString(16).padLeft(2, '0').toUpperCase()}, P2: ${p2.toRadixString(16).padLeft(2, '0').toUpperCase()}');

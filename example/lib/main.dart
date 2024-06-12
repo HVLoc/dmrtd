@@ -351,14 +351,14 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _nfc.setIosAlertMessage("Trying to read EF.CardAccess ...");
         final mrtdData = MrtdData();
 
-        try {
-          mrtdData.cardAccess = await passport.readEfCardAccess();
-        } on PassportError catch (e) {
-          print("erorrrrr 2 " + e.message);
-          //if (e.code != StatusWord.fileNotFound) rethrow;
-        } catch (e) {
-          print("erorrrrr " + e.toString());
-        }
+        // try {
+        //   mrtdData.cardAccess = await passport.readEfCardAccess();
+        // } on PassportError catch (e) {
+        //   print("erorrrrr 2 " + e.message);
+        //   //if (e.code != StatusWord.fileNotFound) rethrow;
+        // } catch (e) {
+        //   print("erorrrrr " + e.toString());
+        // }
 
         _nfc.setIosAlertMessage("Trying to read EF.CardSecurity ...");
 
@@ -453,11 +453,11 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           mrtdData.dg14 = await passport.readEfDG14();
         }
 
-        // if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
-        //   mrtdData.dg15 = await passport.readEfDG15();
-        //   _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
-        //   mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
-        // }
+        if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
+          mrtdData.dg15 = await passport.readEfDG15();
+          _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
+          mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
+        }
 
         if (mrtdData.com!.dgTags.contains(EfDG16.TAG)) {
           mrtdData.dg16 = await passport.readEfDG16();
