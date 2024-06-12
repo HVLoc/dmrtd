@@ -49,11 +49,11 @@ class AAPublicKey {
     }
 
     final tvAlgOID = TLV.decode(tvAlg.value);
-    if (tvAlg.tag.value != 0x06) { // OID
-      throw Exception(
-        "Invalid Algorithm OID object tag=${tvAlgOID.tag.value.hex()}, expected tag=06"
-      );
-    }
+    // if (tvAlg.tag.value != 0x06) { // OID
+    //   throw Exception(
+    //     "Invalid Algorithm OID object tag=${tvAlgOID.tag.value.hex()}, expected tag=06"
+    //   );
+    // }
 
     final rsaOID = "2A864886F70D010101".parseHex();
     if (ListEquality().equals(tvAlgOID.value, rsaOID)) {
