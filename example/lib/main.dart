@@ -352,7 +352,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         final mrtdData = MrtdData();
 
         // try {
-        //   mrtdData.cardAccess = await passport.readEfCardAccess();
+        // mrtdData.cardAccess = await passport.readEfCardAccess();
         // } on PassportError catch (e) {
         //   print("erorrrrr 2 " + e.message);
         //   //if (e.code != StatusWord.fileNotFound) rethrow;
@@ -375,9 +375,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         if (isPace) {
           _nfc.setIosAlertMessage("Initiating session with PACE...");
           // Fix cứng giá trị vì ios không ddọc được efCardAccessData
-          final efCardAccessData =
-              "3134300d060804007f0007020202020101300f060a04007f000702020302020201013012060a04007f0007020204020202010202010d"
-                  .parseHex();
+          final efCardAccessData = "".parseHex(); //TODO: gía trị fix cứng
 
           EfCardAccess efCardAccess = EfCardAccess.fromBytes(efCardAccessData);
           //PACE session
@@ -688,9 +686,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     }
     if (rawData13.isNotEmpty) {
       list.add(_makeMrtdDataWidget(
-          header: 'rawData13',
-          collapsedText: '',
-          dataText: rawData13));
+          header: 'rawData13', collapsedText: '', dataText: rawData13));
     }
 
     if (_mrtdData!.dg14 != null) {
