@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:asn1lib/asn1lib.dart';
 import 'package:dmrtd/dmrtd.dart';
 import 'package:dmrtd/extensions.dart';
 import 'package:dmrtd/src/proto/can_key.dart';
@@ -199,7 +200,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   final _docNumber = TextEditingController(text: '');
   final _dob = TextEditingController(text: ''); // date of birth
   final _doe = TextEditingController(text: '');
-  final _can = TextEditingController(text: '');
+  final _can = TextEditingController(text: '006031');
   bool _checkBoxPACE = false;
 
   MrtdData? _mrtdData;
@@ -449,9 +450,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
             formatProgressMsg("Reading Data Groups 13", 80));
         if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
           mrtdData.dg13 = await passport.readEfDG13();
-          String decodedString =
-              utf8.decode(mrtdData.dg13!.toBytes(), allowMalformed: true);
-          rawData13 = removeSpecialCharacters(decodedString);
+
+          rawData13 = _getDg13VNM(mrtdData.dg13);
         }
 
         if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
@@ -683,6 +683,13 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           header: 'EF.DG12',
           collapsedText: '',
           dataText: _mrtdData!.dg12!.toBytes().hex()));
+      list.add(
+        _makeMrtdDataWidget(
+          header: 'EF.DG12 Raw',
+          collapsedText: '',
+          dataText: _getDg13VNM(_mrtdData!.dg12),
+        ),
+      );
     }
 
     if (_mrtdData!.dg13 != null) {
@@ -968,5 +975,27 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         RegExp(
             r'[^\w\s\r\f\t,:/-áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴđĐ]'),
         '');
+  }
+
+  String _getDg13VNM(DataGroup? byteDg13) {
+    if (byteDg13 == null) return "";
+    Uint8List encodedData = Uint8List.fromList(byteDg13.toBytes());
+    ASN1Parser parser = ASN1Parser(encodedData);
+    ASN1Object asn1Object = parser.nextObject();
+    if (asn1Object is ASN1Sequence) {
+      ASN1Sequence sequence = asn1Object;
+      String asn1Data = sequence.elements[0].toString();
+      RegExp regex = RegExp(r'(UTF8String|PrintableString)\((.*?)\)');
+      Iterable<Match> matches = regex.allMatches(asn1Data);
+      List<String> listDg13 = [];
+      for (Match match in matches) {
+        // String stringType = match.group(1)??"";
+        String value = match.group(2) ?? "";
+        listDg13.add(value);
+      }
+      var raw = listDg13.join(", ");
+      return raw;
+    }
+    return "";
   }
 }
