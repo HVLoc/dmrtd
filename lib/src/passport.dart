@@ -86,9 +86,9 @@ class Passport {
   Future<EfCardAccess> readEfCardAccess() async {
     _log.debug("Reading EF.CardAccess");
 
-    await _selectMF();
-    return EfCardAccess.fromBytes(
-        await _exec(() => _api.readFileBySFI(EfCardAccess.SFI)));
+    // await _selectMF();
+      var a = await _exec(() => _api.readFileBySFI(EfCardAccess.SFI));
+      return EfCardAccess.fromBytes(a);
   }
 
   /// Reads file EF.CardSecurity from passport.

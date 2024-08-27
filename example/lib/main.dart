@@ -196,10 +196,10 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   final _canData = GlobalKey<FormState>();
 
   // mrz data
-  final _docNumber = TextEditingController(text: '098007724');
-  final _dob = TextEditingController(text: '08/18/1998'); // date of birth
-  final _doe = TextEditingController(text: '08/18/2038');
-  final _can = TextEditingController(text: '007724');
+  final _docNumber = TextEditingController(text: '');
+  final _dob = TextEditingController(text: ''); // date of birth
+  final _doe = TextEditingController(text: '');
+  final _can = TextEditingController(text: '');
   bool _checkBoxPACE = false;
 
   MrtdData? _mrtdData;
@@ -352,7 +352,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         final mrtdData = MrtdData();
 
         // try {
-        // mrtdData.cardAccess = await passport.readEfCardAccess();
+        //   mrtdData.cardAccess = await passport.readEfCardAccess();
         // } on PassportError catch (e) {
         //   print("erorrrrr 2 " + e.message);
         //   //if (e.code != StatusWord.fileNotFound) rethrow;
@@ -395,6 +395,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           mrtdData.dg1 = await passport.readEfDG1();
         }
 
+        _nfc.setIosAlertMessage(
+            formatProgressMsg("Vui lòng giữ nguyên CCCD", 40));
         if (mrtdData.com!.dgTags.contains(EfDG2.TAG)) {
           mrtdData.dg2 = await passport.readEfDG2();
         }
@@ -407,6 +409,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         // if(mrtdData.com!.dgTags.contains(EfDG4.TAG)) {
         //   mrtdData.dg4 = await passport.readEfDG4();
         // }
+        _nfc.setIosAlertMessage(formatProgressMsg("Reading Data Groups 5", 45));
 
         if (mrtdData.com!.dgTags.contains(EfDG5.TAG)) {
           mrtdData.dg5 = await passport.readEfDG5();
@@ -424,6 +427,9 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           mrtdData.dg8 = await passport.readEfDG8();
         }
 
+        _nfc.setIosAlertMessage(
+            formatProgressMsg("Reading Data Groups 10", 60));
+
         if (mrtdData.com!.dgTags.contains(EfDG9.TAG)) {
           mrtdData.dg9 = await passport.readEfDG9();
         }
@@ -439,7 +445,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         if (mrtdData.com!.dgTags.contains(EfDG12.TAG)) {
           mrtdData.dg12 = await passport.readEfDG12();
         }
-
+        _nfc.setIosAlertMessage(
+            formatProgressMsg("Reading Data Groups 13", 80));
         if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
           mrtdData.dg13 = await passport.readEfDG13();
           String decodedString =
@@ -476,7 +483,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
             duration: Duration(milliseconds: 500), curve: Curves.ease);
       } on Exception catch (e) {
         final se = e.toString().toLowerCase();
-        String alertMsg = "An error has occurred while reading Passport!";
+        String alertMsg = "An error has occurred while reading Passport!+\n$se";
         if (e is PassportError) {
           if (se.contains("security status not satisfied")) {
             alertMsg =
@@ -892,7 +899,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
                           final firstDate =
                               DateTime(now.year, now.month, now.day + 1);
                           final lastDate =
-                              DateTime(now.year + 10, now.month + 6, now.day);
+                              DateTime(now.year + 1000, now.month + 6, now.day);
                           final initDate = _getDOEDate();
                           final date = await _pickDate(context, firstDate,
                               initDate ?? firstDate, lastDate);

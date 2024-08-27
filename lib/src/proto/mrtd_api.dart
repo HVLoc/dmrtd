@@ -134,43 +134,6 @@ class MrtdApi {
         }
       }
     }
-    // try {
-    //   // Attempt to select the Master File (MF) with P1-P2 = 0x0000 and empty data field
-    //   await icc.selectFile(cla: ISO7816_CLA.NO_SM, p1: 0x04, p2: 0x00);
-    // } on ICCError catch (error) {
-    //   _log.warning(
-    //       "Couldn't select MF with P1: 0x00, P2: 0x00, sw=${error.sw}, retrying with data='3F00'");
-    //   try {
-    //     // Attempt to select the Master File (MF) with P1-P2 = 0x0000 and data field = '0x3F00'
-    //     await icc.selectFile(
-    //         cla: ISO7816_CLA.NO_SM,
-    //         p1: 0x00,
-    //         p2: 0x00,
-    //         data: Uint8List.fromList([0x3F, 0x00]));
-    //   } on ICCError catch (error) {
-    //     _log.warning(
-    //         "Couldn't select MF with P1: 0x00, P2: 0x00, data='3F00', sw=${error.sw}, retrying with P2=0x0C and data='3F00'");
-    //     try {
-    //       // Attempt to select the Master File (MF) with P2=0x0C and data field = '0x3F00'
-    //       await icc.selectFile(
-    //           cla: ISO7816_CLA.NO_SM,
-    //           p1: 0x00,
-    //           p2: 0x0C,
-    //           data: Uint8List.fromList([0x3F, 0x00]));
-    //     } on ICCError catch (error) {
-    //       _log.warning(
-    //           "Couldn't select MF with P2=0x0C, data='3F00', sw=${error.sw}, retrying with P2=0x0C and empty data");
-    //       try {
-    //         // Attempt to select the Master File (MF) with P2=0x0C and empty data field
-    //         await icc.selectFile(cla: ISO7816_CLA.NO_SM, p1: 0x00, p2: 0x0C);
-    //       } on ICCError catch (finalError) {
-    //         _log.warning(
-    //             "Couldn't select MF with P1: 0x00, P2: 0x0C, sw=${finalError.sw}");
-    //         rethrow; // Rethrow the final error after all attempts
-    //       }
-    //     }
-    //   }
-    // }
   }
 
   /// Returns raw EF file bytes of selected DF identified by [fid] from MRTD.
