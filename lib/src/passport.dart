@@ -128,8 +128,8 @@ class Passport {
   /// Throws [PassportError] if file doesn't exist or
   /// if calling this function prior establishing session with passport.
   Future<EfDG1> readEfDG1() async {
-    await _selectDF1();
-    _log.debug("Reading EF.DG1");
+    // await _selectDF1();
+    // _log.debug("Reading EF.DG1");
     return EfDG1.fromBytes(await _exec(() => _api.readFileBySFI(EfDG1.SFI)));
   }
 
@@ -141,8 +141,8 @@ class Passport {
   /// Throws [PassportError] if file doesn't exist or
   /// if calling this function prior establishing session with passport.
   Future<EfDG2> readEfDG2() async {
-    _log.debug("Reading EF.DG2");
-    await _selectDF1();
+    // _log.debug("Reading EF.DG2");
+    // await _selectDF1();
     return EfDG2.fromBytes(await _exec(() => _api.readFileBySFI(EfDG2.SFI)));
   }
 
@@ -266,8 +266,8 @@ class Passport {
   /// Throws [PassportError] if file doesn't exist or
   /// if calling this function prior establishing session with passport.
   Future<EfDG11> readEfDG11() async {
-    _log.debug("Reading EF.DG11");
-    await _selectDF1();
+    // _log.debug("Reading EF.DG11");
+    // await _selectDF1();
     return EfDG11.fromBytes(await _exec(() => _api.readFileBySFI(EfDG11.SFI)));
   }
 
@@ -292,8 +292,8 @@ class Passport {
   /// Throws [PassportError] if file doesn't exist or
   /// if calling this function prior establishing session with passport.
   Future<EfDG13> readEfDG13() async {
-    _log.debug("Reading EF.DG13");
-    await _selectDF1();
+    // _log.debug("Reading EF.DG13");
+    // await _selectDF1();
     return EfDG13.fromBytes(await _exec(() => _api.readFileBySFI(EfDG13.SFI)));
   }
 
@@ -305,8 +305,8 @@ class Passport {
   /// Throws [PassportError] if file doesn't exist or
   /// if calling this function prior establishing session with passport.
   Future<EfDG14> readEfDG14() async {
-    await _selectDF1();
-    _log.debug("Reading EF.DG14");
+    // await _selectDF1();
+    // _log.debug("Reading EF.DG14");
     return EfDG14.fromBytes(await _exec(() => _api.readFileBySFI(EfDG14.SFI)));
   }
 

@@ -200,7 +200,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   final _docNumber = TextEditingController(text: '');
   final _dob = TextEditingController(text: ''); // date of birth
   final _doe = TextEditingController(text: '');
-  final _can = TextEditingController(text: '006031');
+  final _can = TextEditingController(text: '007724');
   bool _checkBoxPACE = false;
 
   MrtdData? _mrtdData;
@@ -372,11 +372,13 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         //set MrtdData
         mrtdData.isPACE = isPace;
         mrtdData.isDBA = accessKey.PACE_REF_KEY_TAG == 0x01;
-
+        print("time start " + DateTime.now().toString());
         if (isPace) {
           _nfc.setIosAlertMessage("Initiating session with PACE...");
           // Fix cứng giá trị vì ios không ddọc được efCardAccessData
-          final efCardAccessData = "".parseHex(); //TODO: gía trị fix cứng
+          final efCardAccessData =
+              "3134300d060804007f0007020202020101300f060a04007f000702020302020201013012060a04007f0007020204020202010202010d"
+                  .parseHex(); //TODO: gía trị fix cứng
 
           EfCardAccess efCardAccess = EfCardAccess.fromBytes(efCardAccessData);
           //PACE session
@@ -412,46 +414,46 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         // }
         _nfc.setIosAlertMessage(formatProgressMsg("Reading Data Groups 5", 45));
 
-        if (mrtdData.com!.dgTags.contains(EfDG5.TAG)) {
-          mrtdData.dg5 = await passport.readEfDG5();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG5.TAG)) {
+        //   mrtdData.dg5 = await passport.readEfDG5();
+        // }
 
-        if (mrtdData.com!.dgTags.contains(EfDG6.TAG)) {
-          mrtdData.dg6 = await passport.readEfDG6();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG6.TAG)) {
+        //   mrtdData.dg6 = await passport.readEfDG6();
+        // }
 
-        if (mrtdData.com!.dgTags.contains(EfDG7.TAG)) {
-          mrtdData.dg7 = await passport.readEfDG7();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG7.TAG)) {
+        //   mrtdData.dg7 = await passport.readEfDG7();
+        // }
 
-        if (mrtdData.com!.dgTags.contains(EfDG8.TAG)) {
-          mrtdData.dg8 = await passport.readEfDG8();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG8.TAG)) {
+        //   mrtdData.dg8 = await passport.readEfDG8();
+        // }
 
         _nfc.setIosAlertMessage(
             formatProgressMsg("Reading Data Groups 10", 60));
 
-        if (mrtdData.com!.dgTags.contains(EfDG9.TAG)) {
-          mrtdData.dg9 = await passport.readEfDG9();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG9.TAG)) {
+        //   mrtdData.dg9 = await passport.readEfDG9(); 
+        // }
 
-        if (mrtdData.com!.dgTags.contains(EfDG10.TAG)) {
-          mrtdData.dg10 = await passport.readEfDG10();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG10.TAG)) {
+        //   mrtdData.dg10 = await passport.readEfDG10();
+        // }
 
-        if (mrtdData.com!.dgTags.contains(EfDG11.TAG)) {
-          mrtdData.dg11 = await passport.readEfDG11();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG11.TAG)) {
+        //   mrtdData.dg11 = await passport.readEfDG11();
+        // }
 
-        if (mrtdData.com!.dgTags.contains(EfDG12.TAG)) {
-          mrtdData.dg12 = await passport.readEfDG12();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG12.TAG)) {
+        //   mrtdData.dg12 = await passport.readEfDG12();
+        // }
         _nfc.setIosAlertMessage(
             formatProgressMsg("Reading Data Groups 13", 80));
         if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
           mrtdData.dg13 = await passport.readEfDG13();
 
-          rawData13 = _getDg13VNM(mrtdData.dg13);
+          // rawData13 = _getDg13VNM(mrtdData.dg13);
         }
 
         if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
@@ -513,6 +515,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           await _nfc.disconnect(
               iosAlertMessage: formatProgressMsg("Finished", 100));
         }
+        print("time end " + DateTime.now().toString());
         setState(() {
           _isReading = false;
         });
