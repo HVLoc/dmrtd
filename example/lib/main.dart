@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
@@ -337,6 +338,12 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _isReading = true;
       });
       try {
+        // Fix cứng giá trị vì ios không ddọc được efCardAccessData
+        final efCardAccessData =
+            "3134300d060804007f0007020202020101300f060a04007f000702020302020201013012060a04007f0007020204020202010202010d"
+                .parseHex(); //TODO: gía trị fix cứng
+
+        EfCardAccess efCardAccess = EfCardAccess.fromBytes(efCardAccessData);
         bool demo = false;
         if (!demo) {
           await _nfc.connect(
@@ -375,12 +382,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         print("time start " + DateTime.now().toString());
         if (isPace) {
           _nfc.setIosAlertMessage("Initiating session with PACE...");
-          // Fix cứng giá trị vì ios không ddọc được efCardAccessData
-          final efCardAccessData =
-              "3134300d060804007f0007020202020101300f060a04007f000702020302020201013012060a04007f0007020204020202010202010d"
-                  .parseHex(); //TODO: gía trị fix cứng
 
-          EfCardAccess efCardAccess = EfCardAccess.fromBytes(efCardAccessData);
           //PACE session
           await passport.startSessionPACE(accessKey, efCardAccess);
         } else {
@@ -394,15 +396,24 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _nfc.setIosAlertMessage(
             formatProgressMsg("Reading Data Groups ...", 20));
 
-        if (mrtdData.com!.dgTags.contains(EfDG1.TAG)) {
+        Future<void> getDg1() async {
           mrtdData.dg1 = await passport.readEfDG1();
         }
 
+        // if (mrtdData.com!.dgTags.contains(EfDG1.TAG)) {
+        //   mrtdData.dg1 = await passport.readEfDG1();
+        // }
+
         _nfc.setIosAlertMessage(
             formatProgressMsg("Vui lòng giữ nguyên CCCD", 40));
-        if (mrtdData.com!.dgTags.contains(EfDG2.TAG)) {
+
+        Future<void> getDg2() async {
           mrtdData.dg2 = await passport.readEfDG2();
         }
+
+        // if (mrtdData.com!.dgTags.contains(EfDG2.TAG)) {
+        //   mrtdData.dg2 = await passport.readEfDG2();
+        // }
 
         // To read DG3 and DG4 session has to be established with CVCA certificate (not supported).
         // if(mrtdData.com!.dgTags.contains(EfDG3.TAG)) {
@@ -434,7 +445,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
             formatProgressMsg("Reading Data Groups 10", 60));
 
         // if (mrtdData.com!.dgTags.contains(EfDG9.TAG)) {
-        //   mrtdData.dg9 = await passport.readEfDG9(); 
+        //   mrtdData.dg9 = await passport.readEfDG9();
         // }
 
         // if (mrtdData.com!.dgTags.contains(EfDG10.TAG)) {
@@ -450,29 +461,63 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         // }
         _nfc.setIosAlertMessage(
             formatProgressMsg("Reading Data Groups 13", 80));
-        if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
-          mrtdData.dg13 = await passport.readEfDG13();
 
-          // rawData13 = _getDg13VNM(mrtdData.dg13);
+        // if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
+        //   mrtdData.dg13 = await passport.readEfDG13();
+
+        //   rawData13 = _getDg13VNM(mrtdData.dg13);
+        // }
+
+        Future<void> getDg13() async {
+          mrtdData.dg13 = await passport.readEfDG13();
+          rawData13 = _getDg13VNM(mrtdData.dg13);
         }
 
-        if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
+        // if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
+        //   mrtdData.dg14 = await passport.readEfDG14();
+        // }
+
+        Future<void> getDg14() async {
           mrtdData.dg14 = await passport.readEfDG14();
         }
 
-        if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
+        // if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
+        //   mrtdData.dg15 = await passport.readEfDG15();
+        //   _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
+        //   mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
+        // }
+
+        Future<void> getDg15() async {
           mrtdData.dg15 = await passport.readEfDG15();
           _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
           mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
         }
 
-        if (mrtdData.com!.dgTags.contains(EfDG16.TAG)) {
-          mrtdData.dg16 = await passport.readEfDG16();
-        }
+        // if (mrtdData.com!.dgTags.contains(EfDG16.TAG)) {
+        //   mrtdData.dg16 = await passport.readEfDG16();
+        // }
 
         _nfc.setIosAlertMessage(formatProgressMsg("Reading EF.SOD ...", 80));
-        mrtdData.sod = await passport.readEfSOD();
+        // mrtdData.sod = await passport.readEfSOD();
 
+        Future<void> getsod() async {
+          mrtdData.sod = await passport.readEfSOD();
+        }
+
+        await Future.wait([
+          _nfc.setIosAlertMessage(
+              formatProgressMsg("Reading Data Groups 1", 20)),
+          getDg1(),
+          _nfc.setIosAlertMessage(
+              formatProgressMsg("Reading Data Groups 2", 60)),
+
+          _nfc.setIosAlertMessage(
+              formatProgressMsg("Reading Data Groups 13", 80)),
+          getDg13(),
+          getDg14(), getDg2(),
+          // getDg15(),
+          // getsod(),
+        ]);
         setState(() {
           _mrtdData = mrtdData;
         });
@@ -481,8 +526,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           _alertMessage = "";
         });
 
-        _scrollController.animateTo(300.0,
-            duration: Duration(milliseconds: 500), curve: Curves.ease);
+        // _scrollController.animateTo(300.0,
+        //     duration: Duration(milliseconds: 500), curve: Curves.ease);
       } on Exception catch (e) {
         final se = e.toString().toLowerCase();
         String alertMsg = "An error has occurred while reading Passport!+\n$se";
