@@ -2,7 +2,6 @@
 // ignore_for_file: prefer_adjacent_string_concatenation, prefer_interpolation_to_compose_strings
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:asn1lib/asn1lib.dart';
 import 'package:dmrtd/dmrtd.dart';
@@ -10,7 +9,6 @@ import 'package:dmrtd/extensions.dart';
 import 'package:dmrtd/src/proto/can_key.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -215,6 +213,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   late final TabController _tabController;
 
   String rawData13 = '';
+  String timeStart = '';
+  String timeEnd = '';
 
   @override
   void initState() {
@@ -380,7 +380,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         //set MrtdData
         mrtdData.isPACE = isPace;
         mrtdData.isDBA = accessKey.PACE_REF_KEY_TAG == 0x01;
-        print("time start " + DateTime.now().toString());
+        timeStart = "time start " + DateTime.now().toString();
+        print(timeStart);
         if (isPace) {
           _nfc.setIosAlertMessage("Initiating session with PACE...");
 
@@ -519,7 +520,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           await _nfc.disconnect(
               iosAlertMessage: formatProgressMsg("Finished", 100));
         }
-        print("time end " + DateTime.now().toString());
+        timeEnd = "time end   " + DateTime.now().toString();
+        print(timeEnd);
         setState(() {
           _isReading = false;
         });
@@ -571,7 +573,8 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   List<Widget> _mrtdDataWidgets() {
     List<Widget> list = [];
     if (_mrtdData == null) return list;
-
+    list.add(Text(timeStart));
+    list.add(Text(timeEnd));
     if (_mrtdData!.isPACE != null && _mrtdData!.isDBA != null) {
       list.add(_makeMrtdAccessDataWidget(
           header: "Access protocol",

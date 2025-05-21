@@ -42,7 +42,7 @@ class MrtdApi {
       ISO97816_SelectFileP2.returnFCP | ISO97816_SelectFileP2.returnFMD;
   final _log = Logger("mrtd.api");
   static const int _defaultReadLength =
-      224; // 256 = expect maximum number of bytes. TODO: in production set it to 224 - JMRTD
+      2048; // 256 = expect maximum number of bytes. TODO: in production set it to 224 - JMRTD
   int _maxRead = _defaultReadLength;
   static const int _readAheadLength =
       8; // Number of bytes to read at the start of file to determine file length.
@@ -191,6 +191,14 @@ class MrtdApi {
     return rawFile;
   }
 
+  /// Hàm giảm _maxRead khi gặp lỗi
+  void _reduceMaxRead() {
+    if (_maxRead > 1) {
+      _maxRead = (_maxRead ~/ 2).clamp(1, _defaultReadLength);
+      _log.info("Reduced _maxRead to $_maxRead");
+    }
+  }
+
   /// Reads [length] long fragment of file starting at [offset].
   Future<Uint8List> _readBinary(
       {required int offset, required int length}) async {
@@ -280,27 +288,27 @@ class MrtdApi {
     return data;
   }
 
-  void _reduceMaxRead() {
-    if (_maxRead > 224) {
-      _maxRead = 224; // JMRTD lib's default read size
-    } else if (_maxRead > 160) {
-      // Some passports can't handle more then 160 bytes per read
-      _maxRead = 160;
-    } else if (_maxRead > 128) {
-      _maxRead = 128;
-    } else if (_maxRead > 96) {
-      _maxRead = 96;
-    } else if (_maxRead > 64) {
-      _maxRead = 64;
-    } else if (_maxRead > 32) {
-      _maxRead = 32;
-    } else if (_maxRead > 16) {
-      _maxRead = 16;
-    } else if (_maxRead > 8) {
-      _maxRead = 8;
-    } else {
-      _maxRead = 1; // last resort try to read 1 byte at the time
-    }
-    _log.info("Max read changed to: $_maxRead");
-  }
+  // void _reduceMaxRead() {
+  //   if (_maxRead > 224) {
+  //     _maxRead = 224; // JMRTD lib's default read size
+  //   } else if (_maxRead > 160) {
+  //     // Some passports can't handle more then 160 bytes per read
+  //     _maxRead = 160;
+  //   } else if (_maxRead > 128) {
+  //     _maxRead = 128;
+  //   } else if (_maxRead > 96) {
+  //     _maxRead = 96;
+  //   } else if (_maxRead > 64) {
+  //     _maxRead = 64;
+  //   } else if (_maxRead > 32) {
+  //     _maxRead = 32;
+  //   } else if (_maxRead > 16) {
+  //     _maxRead = 16;
+  //   } else if (_maxRead > 8) {
+  //     _maxRead = 8;
+  //   } else {
+  //     _maxRead = 1; // last resort try to read 1 byte at the time
+  //   }
+  //   _log.info("Max read changed to: $_maxRead");
+  // }
 }
