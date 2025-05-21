@@ -216,8 +216,6 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   String timeStart = '';
   String timeEnd = '';
 
-  EfCardAccess efCardAccess = EfCardAccess.fromBytes("".parseHex());
-
   @override
   void initState() {
     super.initState();
@@ -341,6 +339,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _isReading = true;
       });
       try {
+        EfCardAccess efCardAccess = EfCardAccess.fromBytes("".parseHex());
         bool demo = false;
         if (!demo) {
           await _nfc.connect(
