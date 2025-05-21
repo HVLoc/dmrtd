@@ -42,7 +42,7 @@ class MrtdApi {
       ISO97816_SelectFileP2.returnFCP | ISO97816_SelectFileP2.returnFMD;
   final _log = Logger("mrtd.api");
   static const int _defaultReadLength =
-      112; // 256 = expect maximum number of bytes. TODO: in production set it to 224 - JMRTD
+      224; // 256 = expect maximum number of bytes. TODO: in production set it to 224 - JMRTD
   int _maxRead = _defaultReadLength;
   static const int _readAheadLength =
       8; // Number of bytes to read at the start of file to determine file length.

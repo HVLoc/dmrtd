@@ -10,6 +10,7 @@ import 'package:dmrtd/extensions.dart';
 import 'package:dmrtd/src/proto/can_key.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -396,24 +397,16 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _nfc.setIosAlertMessage(
             formatProgressMsg("Reading Data Groups ...", 20));
 
-        Future<void> getDg1() async {
+        if (mrtdData.com!.dgTags.contains(EfDG1.TAG)) {
           mrtdData.dg1 = await passport.readEfDG1();
         }
-
-        // if (mrtdData.com!.dgTags.contains(EfDG1.TAG)) {
-        //   mrtdData.dg1 = await passport.readEfDG1();
-        // }
 
         _nfc.setIosAlertMessage(
             formatProgressMsg("Vui lòng giữ nguyên CCCD", 40));
 
-        Future<void> getDg2() async {
+        if (mrtdData.com!.dgTags.contains(EfDG2.TAG)) {
           mrtdData.dg2 = await passport.readEfDG2();
         }
-
-        // if (mrtdData.com!.dgTags.contains(EfDG2.TAG)) {
-        //   mrtdData.dg2 = await passport.readEfDG2();
-        // }
 
         // To read DG3 and DG4 session has to be established with CVCA certificate (not supported).
         // if(mrtdData.com!.dgTags.contains(EfDG3.TAG)) {
@@ -462,62 +455,28 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _nfc.setIosAlertMessage(
             formatProgressMsg("Reading Data Groups 13", 80));
 
-        // if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
-        //   mrtdData.dg13 = await passport.readEfDG13();
-
-        //   rawData13 = _getDg13VNM(mrtdData.dg13);
-        // }
-
-        Future<void> getDg13() async {
+        if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
           mrtdData.dg13 = await passport.readEfDG13();
+
           rawData13 = _getDg13VNM(mrtdData.dg13);
         }
 
-        // if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
-        //   mrtdData.dg14 = await passport.readEfDG14();
-        // }
-
-        Future<void> getDg14() async {
+        if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
           mrtdData.dg14 = await passport.readEfDG14();
         }
 
-        // if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
-        //   mrtdData.dg15 = await passport.readEfDG15();
-        //   _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
-        //   mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
-        // }
-
-        Future<void> getDg15() async {
+        if (mrtdData.com!.dgTags.contains(EfDG15.TAG)) {
           mrtdData.dg15 = await passport.readEfDG15();
           _nfc.setIosAlertMessage(formatProgressMsg("Doing AA ...", 60));
           mrtdData.aaSig = await passport.activeAuthenticate(Uint8List(8));
         }
-
         // if (mrtdData.com!.dgTags.contains(EfDG16.TAG)) {
         //   mrtdData.dg16 = await passport.readEfDG16();
         // }
 
         _nfc.setIosAlertMessage(formatProgressMsg("Reading EF.SOD ...", 80));
-        // mrtdData.sod = await passport.readEfSOD();
+        mrtdData.sod = await passport.readEfSOD();
 
-        Future<void> getsod() async {
-          mrtdData.sod = await passport.readEfSOD();
-        }
-
-        await Future.wait([
-          _nfc.setIosAlertMessage(
-              formatProgressMsg("Reading Data Groups 1", 20)),
-          getDg1(),
-          _nfc.setIosAlertMessage(
-              formatProgressMsg("Reading Data Groups 2", 60)),
-
-          _nfc.setIosAlertMessage(
-              formatProgressMsg("Reading Data Groups 13", 80)),
-          getDg13(),
-          getDg14(), getDg2(),
-          // getDg15(),
-          // getsod(),
-        ]);
         setState(() {
           _mrtdData = mrtdData;
         });
