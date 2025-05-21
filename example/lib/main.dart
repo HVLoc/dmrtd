@@ -216,6 +216,10 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   String timeStart = '';
   String timeEnd = '';
 
+  EfCardAccess efCardAccess = EfCardAccess.fromBytes(
+      "3134300d060804007f0007020202020101300f060a04007f000702020302020201013012060a04007f0007020204020202010202010d"
+          .parseHex());
+
   @override
   void initState() {
     super.initState();
@@ -339,12 +343,6 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _isReading = true;
       });
       try {
-        // Fix cứng giá trị vì ios không ddọc được efCardAccessData
-        final efCardAccessData =
-            "3134300d060804007f0007020202020101300f060a04007f000702020302020201013012060a04007f0007020204020202010202010d"
-                .parseHex(); //TODO: gía trị fix cứng
-
-        EfCardAccess efCardAccess = EfCardAccess.fromBytes(efCardAccessData);
         bool demo = false;
         if (!demo) {
           await _nfc.connect(
@@ -387,9 +385,11 @@ class _MrtdHomePageState extends State<MrtdHomePage>
 
           //PACE session
           await passport.startSessionPACE(accessKey, efCardAccess);
+          print("time start SessionPACE" + DateTime.now().toString());
         } else {
           //BAC session
           await passport.startSession(accessKey as DBAKey);
+          print("time start DBAKey" + DateTime.now().toString());
         }
 
         _nfc.setIosAlertMessage(formatProgressMsg("Reading EF.COM ...", 0));

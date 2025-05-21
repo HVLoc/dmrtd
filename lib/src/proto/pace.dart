@@ -997,7 +997,7 @@ class PACE {
 
       //step 1
       try {
-          await Future.delayed(Duration(milliseconds: 1000));
+          // await Future.delayed(Duration(milliseconds: 1000));
           Uint8List step1data = generateGeneralAuthenticateDataStep1();
           final step1Response = await icc.generalAuthenticatePACEstep1(data: step1data);
           //here the response is always 9000, otherwise exception is thrown
