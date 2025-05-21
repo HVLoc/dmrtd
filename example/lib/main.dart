@@ -200,7 +200,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   final _docNumber = TextEditingController(text: '');
   final _dob = TextEditingController(text: ''); // date of birth
   final _doe = TextEditingController(text: '');
-  final _can = TextEditingController(text: '007724');
+  final _can = TextEditingController(text: '');
   bool _checkBoxPACE = false;
 
   MrtdData? _mrtdData;
@@ -216,9 +216,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   String timeStart = '';
   String timeEnd = '';
 
-  EfCardAccess efCardAccess = EfCardAccess.fromBytes(
-      "3134300d060804007f0007020202020101300f060a04007f000702020302020201013012060a04007f0007020204020202010202010d"
-          .parseHex());
+  EfCardAccess efCardAccess = EfCardAccess.fromBytes("".parseHex());
 
   @override
   void initState() {
